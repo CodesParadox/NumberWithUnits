@@ -15,52 +15,30 @@ namespace ariel
 		this->str = str;
 	}
 
-	double integrityCheck(double val, string src, string dest)
-	{
-		if (src == dest)
-		{
-			return val;
-		}
-		try
-		{
-			return (val * unitList.at(src).at(dest));
-		}
-		catch (const exception &e)
-		{
-			throw invalid_argument{"Types not from the same system!"};
-		}
-	}
 
 	void incomeUnit(const string unit1, const string unit2)
 	{
-		for (auto map : unitList[unit2])
-		{
-			double val = unitList[unit1][unit2] * map.second;
-			unitList[unit1][map.first] = val;
-			unitList[map.first][unit1] = 1 / val;
-		}
+// 		for (auto map : unitList[unit2])
+// 		{
+// 			double val = unitList[unit1][unit2] * map.second;
+// 			unitList[unit1][map.first] = val;
+// 			unitList[map.first][unit1] = 1 / val;
+// 		}
 	}
 
 	void NumberWithUnits::read_units(std::ifstream &units_file)
 	{
-		string unit1, unit2, c;
-		double val1, val2;
+// 		string unit1, unit2, c;
+// 		double val1, val2;
 
-		while (units_file >> val1 >> unit1 >> c >> val2 >> unit2)
-		{
-			//cout << val1 << " " <<unit1 << " "<< c  << " "<<val2 <<"  "<<unit2 <<endl;
-			unitList[unit1][unit2] = val2;
-			unitList[unit2][unit1] = 1 / val2;
-			incomeUnit(unit1, unit2);
-			incomeUnit(unit2, unit1);
-		}
-		// for (auto pair1 : unitList){
-		//         for (auto pair2 : unitList[pair1.first])
-		//         {
-		//             cout << pair1.first<<" "<< pair2.first<<" "<< pair2.second<<endl;
-		//         }
-		//     }
-	}
+// 		while (units_file >> val1 >> unit1 >> c >> val2 >> unit2)
+// 		{ 			
+// 			unitList[unit1][unit2] = val2;
+// 			unitList[unit2][unit1] = 1 / val2;
+// 			incomeUnit(unit1, unit2);
+// 			incomeUnit(unit2, unit1);
+// 		}
+		}	
 
 	NumberWithUnits operator+(const NumberWithUnits &k)
 	{
@@ -68,11 +46,10 @@ namespace ariel
 	}
 	NumberWithUnits operator+(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
-		return NumberWithUnits(k.number + integrityCheck(j.number, j.str, k.str), k.str);
+		return NumberWithUnits(k);
 	}
 	NumberWithUnits operator+=(NumberWithUnits &k, const NumberWithUnits &j)
 	{
-		//k.number += integrityCheck(j.number, j.str, k.str);
 		return k;
 	}
 
@@ -82,44 +59,36 @@ namespace ariel
 	}
 	NumberWithUnits operator-(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
-		//double numCheck = integrityCheck(j.number, j.str, k.str);
 		return NumberWithUnits(k);
 	}
 	NumberWithUnits operator-=(NumberWithUnits &k, const NumberWithUnits &j)
 	{
-		//k.number -= integrityCheck(j.number, j.str, k.str);
 		return k;
 	}
 
 	bool operator>(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
 		return true;
-		//return (k.number > integrityCheck(j.number, j.str, k.str));
 	}
 	bool operator>=(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
 		return true;
-		//return (k.number >= integrityCheck(j.number, j.str, k.str));
 	}
 	bool operator<(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
 		return true;
-		//return (k.number < integrityCheck(j.number, j.str, k.str));
 	}
 	bool operator<=(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
 		return true;
-		//return (k.number <= integrityCheck(j.number, j.str, k.str));
 	}
 	bool operator==(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
 		return true;
-		//return (k.number == integrityCheck(j.number, j.str, k.str));
 	}
 	bool operator!=(const NumberWithUnits &k, const NumberWithUnits &j)
 	{
 		return true;
-		//return (k.number != integrityCheck(j.number, j.str, k.str));
 	}
 
 	NumberWithUnits operator++(NumberWithUnits &k)
