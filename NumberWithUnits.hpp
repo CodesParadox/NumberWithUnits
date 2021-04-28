@@ -1,55 +1,54 @@
-#pragma once // ifendef
-#include <iostream>
+//#pragma once // ifendef
 #include <fstream>
-#include <unordered_map>
-#include <string>
 #include <iostream>
-
+#include <string>
 using namespace std;
+
+
 namespace ariel
 {
 
-	class NumberWithUnits
-	{
-	private:
-		double number;
-		string str;
+    class NumberWithUnits
+    {
+        private:
+            double number;
+            string str;  
+    
+        public:
 
-	public:
-		NumberWithUnits(double number, const string &str);
+            NumberWithUnits(double number , const string &str);
+		~NumberWithUnits(){};
+            static void read_units(ifstream &units_file);
 
-		double getNumber() const { return number; }
-		string getstr() const { return str; }
-		static void read_units(std::ifstream &units_file);
-		/*  */
-		friend NumberWithUnits operator+(const NumberWithUnits &k);
-		friend NumberWithUnits operator+(const NumberWithUnits &k, const NumberWithUnits &i);
-		friend NumberWithUnits operator+=(NumberWithUnits &k, const NumberWithUnits &i);
-		/*  */
-		friend NumberWithUnits operator-(const NumberWithUnits &k);
-		friend NumberWithUnits operator-(const NumberWithUnits &k, const NumberWithUnits &i);
-		friend NumberWithUnits operator-=(NumberWithUnits &k, const NumberWithUnits &i);
+		// In&Out
+            friend ostream &operator<<(ostream& os, const NumberWithUnits& c);
+        	friend istream &operator>>(istream& is, NumberWithUnits& n);
+            //+++++++++++++++++++++/
+            NumberWithUnits operator+()const ;
+           friend NumberWithUnits operator+(const NumberWithUnits &n);
+           friend NumberWithUnits operator+(const NumberWithUnits &n,const NumberWithUnits &k);
 
-		/*  */
-		friend bool operator>(const NumberWithUnits &k, const NumberWithUnits &i);
-		friend bool operator>=(const NumberWithUnits &k, const NumberWithUnits &i);
-		friend bool operator<(const NumberWithUnits &k, const NumberWithUnits &i);
-		friend bool operator<=(const NumberWithUnits &k, const NumberWithUnits &i);
-		friend bool operator==(const NumberWithUnits &k, const NumberWithUnits &i);
-		friend bool operator!=(const NumberWithUnits &k, const NumberWithUnits &i);
-		/*  */
-		friend NumberWithUnits operator++(NumberWithUnits &another1);
-		friend NumberWithUnits operator++(NumberWithUnits &another1, int);
-		friend NumberWithUnits operator--(NumberWithUnits &another1);
-		friend NumberWithUnits operator--(NumberWithUnits &another1, int);
+            //----------------------/
+            friend NumberWithUnits operator-(const NumberWithUnits &n);
+		 friend NumberWithUnits operator-(const NumberWithUnits &n,const NumberWithUnits &k);
 
-		/*  */
-		friend NumberWithUnits operator*(const double n, const NumberWithUnits &c);
-		friend NumberWithUnits operator*(const NumberWithUnits &c, const double n);
-		friend NumberWithUnits operator*=(const double n, const NumberWithUnits &c);
-		friend NumberWithUnits operator*=(const NumberWithUnits &c, const double n);
+            //Booleans//
+          	friend bool operator>(const NumberWithUnits &n,const NumberWithUnits &k );
+           	friend bool operator>=(const NumberWithUnits &n,const NumberWithUnits &k);
+            friend bool operator<(const NumberWithUnits &n,const NumberWithUnits &k);
+            friend bool operator<=(const NumberWithUnits &n,const NumberWithUnits &k);
+            friend bool operator==(const NumberWithUnits &n,const NumberWithUnits &k);
+            friend bool operator!=(const NumberWithUnits &n,const NumberWithUnits &k);
+            NumberWithUnits &operator++();
+            NumberWithUnits operator++(int);
+            NumberWithUnits &operator--();
+            NumberWithUnits operator--(int);
+		NumberWithUnits &operator-=(const NumberWithUnits &n);
+		NumberWithUnits &operator+=(const NumberWithUnits &n);
+		NumberWithUnits &operator*(double n);
+            friend NumberWithUnits operator*(const NumberWithUnits &n,double k);
+            friend NumberWithUnits operator*(double k,const NumberWithUnits &n);
 
-		friend std::ostream &operator<<(std::ostream &in, const NumberWithUnits &c);
-		friend std::istream &operator>>(std::istream &out, NumberWithUnits &c);
-	};
+            
+    };
 }

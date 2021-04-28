@@ -1,136 +1,182 @@
 #include <iostream>
+#include "NumberWithUnits.hpp"
 #include <fstream>
 #include <map>
-#include "NumberWithUnits.hpp"
+
 using namespace std;
+const double EPS = 0.001;
 
 namespace ariel
 {
-	static map<string, map<string, double>> unitList;
+    static map<string, map<string, double>> MapUnit;
+    
+   // check if the unit is in the map 
+    NumberWithUnits::NumberWithUnits(double number, const string &str)
+    {
+       if (MapUnit.count(str) == 0)
+        {
+            throw invalid_argument("unit doesnt exist "+str);
+        }
+        //MapUnit.at(str);
+	  (*this).number = number;
+	  (*this).str =str;
+    }
 
-	NumberWithUnits::NumberWithUnits(double number, const string &str)
-	{
-		cout << number << str << endl;
-		this->number = number;
-		this->str = str;
-	}
+
+    double changer(double num,const string &first ,const string &last)
+    {
+        if (first == last)
+            return num;
+	string t = num * MapUnit.at(first).at(last);
+        if(MapUnit[first].find(last) == MapUnit[first].end()){
+		   throw invalid_argument{"not the same family of values!"};
+	  }
+        return num * MapUnit.at(first).at(last);
+        }
+       
+    }
 
 
-	void incomeUnit(const string unit1, const string unit2)
-	{
-// 		for (auto map : unitList[unit2])
-// 		{
-// 			double val = unitList[unit1][unit2] * map.second;
-// 			unitList[unit1][map.first] = val;
-// 			unitList[map.first][unit1] = 1 / val;
-// 		}
-	}
+    void insertUnit(const string& unit1, const string& unit2)
+    {
+        for (auto &map : MapUnit[unit2])
+        {
+            double num = MapUnit[unit1][unit2] * map.second;
+            MapUnit[unit1][map.first] = num;
+            MapUnit[map.first][unit1] = 1 / num;
+        }
+    }
 
-	void NumberWithUnits::read_units(std::ifstream &units_file)
-	{
-// 		string unit1, unit2, c;
-// 		double val1, val2;
+    void NumberWithUnits::read_units(ifstream &units_file)
+    {
+        string u1;
+	  string u2;
+	  string s1;
+        double v1=0;
+	  double v2=0;
 
-// 		while (units_file >> val1 >> unit1 >> c >> val2 >> unit2)
-// 		{ 			
-// 			unitList[unit1][unit2] = val2;
-// 			unitList[unit2][unit1] = 1 / val2;
-// 			incomeUnit(unit1, unit2);
-// 			incomeUnit(unit2, unit1);
-// 		}
-		}	
+        while (units_file >> v1 >> u1 >> s1 >> v2 >> u2)
+        {
+            MapUnit[u1][u2] = v2;
+            MapUnit[u2][u1] = 1 / v2;
+            insertUnit(u1, u2);
+            insertUnit(u2, u1);
+        }
+    }
 
-	NumberWithUnits operator+(const NumberWithUnits &k)
-	{
-		return NumberWithUnits(k.number, k.str);
-	}
-	NumberWithUnits operator+(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return NumberWithUnits(k);
-	}
-	NumberWithUnits operator+=(NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return k;
-	}
+    //================ + ====================//
 
-	NumberWithUnits operator-(const NumberWithUnits &k)
-	{
-		return NumberWithUnits((-1) * k.number, k.str);
-	}
-	NumberWithUnits operator-(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return NumberWithUnits(k);
-	}
-	NumberWithUnits operator-=(NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return k;
-	}
+   
+    NumberWithUnits operator+(const NumberWithUnits &n) 
+    {
+       (*this).number += changer(n.number, n.str, this->str);
+        return *this;
+    }
+    NumberWithUnits &NumberWithUnits::operator+=(const NumberWithUnits &n)
+    {
+        (*this).number += changer(n.number, n.str, this->str);
+        return *this;
+    }
 
-	bool operator>(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return true;
-	}
-	bool operator>=(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return true;
-	}
-	bool operator<(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return true;
-	}
-	bool operator<=(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return true;
-	}
-	bool operator==(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return true;
-	}
-	bool operator!=(const NumberWithUnits &k, const NumberWithUnits &j)
-	{
-		return true;
-	}
+   
+    NumberWithUnits NumberWithUnits::operator-(const NumberWithUnits &n) const
+    {
+        double numCheck = changer(n.number, n.str, this->str);
+        return NumberWithUnits(this->number - numCheck, this->str);
+    }
+    NumberWithUnits::operator-=(const NumberWithUnits &n)
+    {
+        this->number -= changer(n.number, n.str, this->str);
+        return NumberWithUnits((*this).number -=);
+    }
 
-	NumberWithUnits operator++(NumberWithUnits &k)
-	{
-		return NumberWithUnits(k);
-	}
 
-	NumberWithUnits operator++(NumberWithUnits j, int)
-	{
-		return NumberWithUnits(j);
-	}
+    bool NumberWithUnits::operator>(const NumberWithUnits &n) 
+    {
+        double compare = changer(n.number, n.str, this->str);
+        return (this->number > compare);
+    }
+    bool NumberWithUnits::operator>=(const NumberWithUnits &n) 
+    {
+        return !(*this < n);
+    }
+    bool NumberWithUnits::operator<(const NumberWithUnits &n)
+    {
+        return (this->number < changer(n.number, n.str, this->str));
+    }
+    bool NumberWithUnits::operator<=(const NumberWithUnits &n)
+    {
+        return !(*this > n);
+    }
+    bool NumberWithUnits::operator==(const NumberWithUnits &n, const NumberWithUnits &k) 
+    {
+        return (abs(this->number-changer(n.number, n.str, this->str))<=EPS);
+    }
+    bool NumberWithUnits::operator!=(const NumberWithUnits &n) 
+    {
+        return !(*this == n);
+    }
 
-	NumberWithUnits operator--(NumberWithUnits &k)
-	{
-		return NumberWithUnits(k);
-	}
 
-	NumberWithUnits operator--(NumberWithUnits &k, int)
-	{
-		return NumberWithUnits(k);
-	}
+    NumberWithUnits &NumberWithUnits::operator++()
+    {
+        ++(this->number);
+        return *this;
+    }
 
-	NumberWithUnits operator*(const double mispar, const NumberWithUnits &c)
-	{
-		return NumberWithUnits(c.number * mispar, c.str);
-	}
+    NumberWithUnits NumberWithUnits::operator++(int)
+    {
 
-	NumberWithUnits operator*(const NumberWithUnits &c, const double mispar)
-	{
-		return NumberWithUnits(c.number * mispar, c.str);
-	}
+        return NumberWithUnits((*this).number++, this->str);
+    }
 
-	std::ostream &operator<<(std::ostream &os, const NumberWithUnits &c)
-	{
-		return os;
-	}
+    NumberWithUnits& NumberWithUnits::operator--()
+    {
+        --(this->number);
+        return *this; 
+    }
 
-	std::istream &operator>>(std::istream &is, NumberWithUnits &c)
-	{
-		string s;
-		is >> c.number >> s >> c.str;
-		return is;
-	}
+    NumberWithUnits NumberWithUnits::operator--(int)
+    {
+        return NumberWithUnits(this->number--, this->str);
+    }
+
+
+
+
+    NumberWithUnits operator*(double d, const NumberWithUnits &n)
+    {
+        return NumberWithUnits(n.number * d, n.str);
+    }
+
+    NumberWithUnits NumberWithUnits::operator*(double n) 
+    {
+        return n*(*this);
+
+    std::ostream& operator<<(std::ostream &os, const NumberWithUnits &c)
+    {
+        os << c.number << "[" << c.str << "]";
+        return os;
+    }
+
+    }
+
+    istream &operator>>(istream &is, NumberWithUnits &n) {
+        double num=0;
+        string type;
+        char c=' ';
+        is >> num;
+        is >> c ;
+        while(c!=']'){
+            if(c!='['){
+                type.insert(type.end(),c);
+            }
+            is>>c;
+        }
+       if(MapUnit[type].empty()){throw invalid_argument{"unit doesnt exist"};};
+        n.number=num;
+        n.str=type;
+        return is;
+    }
 
 };
