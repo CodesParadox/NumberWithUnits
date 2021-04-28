@@ -1,23 +1,25 @@
-#include <iostream>
+
 #include "NumberWithUnits.hpp"
+#include <iostream>
 #include <fstream>
 #include <map>
+#include <sstream>
 
 using namespace std;
 const double EPS = 0.001;
-
+//static map<string, map<string, double>> MapUnity;
 namespace ariel
 {
-    static map<string, map<string, double>> MapUnit;
+    static map<string, map<string, double>> MapUnity;
     
    // check if the unit is in the map 
     NumberWithUnits::NumberWithUnits(double number, const string &str)
     {
-       if (MapUnit.count(str) == 0)
+       if (MapUnity.count(str) == 0)
         {
             throw invalid_argument("unit doesnt exist "+str);
         }
-        //MapUnit.at(str);
+        //MapUnity.at(str);
 	  (*this).number = number;
 	  (*this).str =str;
     }
@@ -28,49 +30,49 @@ namespace ariel
         if (first == last)
             return num;
 	
-        if(MapUnit[first].find(last) == MapUnit[first].end()){
+        if(MapUnity[first].find(last) == MapUnity[first].end()){
 		   throw invalid_argument{"not the same family of values!"};
 	  }
-        return num * MapUnit.at(first).at(last);
+        return num * MapUnity.at(first).at(last);
         }
        
     }
 
 
-    void insertUnit(const string& unit1, const string& unit2)
-    {
-        for (auto &map : MapUnit[unit2])
-        {
-            double num = MapUnit[unit1][unit2] * map.second;
-            MapUnit[unit1][map.first] = num;
-            MapUnit[map.first][unit1] = 1 / num;
-        }
-    }
 
-    void NumberWithUnits::read_units(ifstream &units_file)
-    {
-        string u1;
-	  string u2;
-	  string s1;
+
+  	void NumberWithUnits::read_units(ifstream &units_file){
+        string u1 = " ";
+	  string n1 = " ";
+	  string u2 = " ";
+	  string n2 = " ";
+	  string s1 = " ";
         double v1=0;
 	  double v2=0;
 
         while (units_file >> v1 >> u1 >> s1 >> v2 >> u2)
         {
-            MapUnit[u1][u2] = v2;
-            MapUnit[u2][u1] = 1 / v2;
-            insertUnit(u1, u2);
-            insertUnit(u2, u1);
-        }
-    }
+            MapUnity[u1][u2] = v2;
+            MapUnity[u2][u1] = 1 / v2;
 
-    //================ + ====================//
+		for (auto &map : MapUnity[u2]){
+            MapUnity[u1][map.first] = MapUnity[u1][u2] * map.second;
+            MapUnity[map.first][u1] = 1 / (MapUnity[u1][u2] * map.second);
+		}
+
+		for (auto &mapy : MapUnity[n1]){
+            MapUnity[n2][mapy.first] = MapUnity[n2][n1] * mapy.second;
+            MapUnity[mapy.first][n2] = 1 / (MapUnity[n2][n1] * mapy.second);
+        }
+
+	  }
+    }
 
    
     NumberWithUnits operator+(const NumberWithUnits &n) 
     {
-       (*this).number += changer(n.number, n.str, this->str);
-        return *this;
+       //(*n).number += changer(n.number, n.str, (*n).str);
+        return NumberWithUnits(n.number, n.str);
     }
     NumberWithUnits &NumberWithUnits::operator+=(const NumberWithUnits &n)
     {
@@ -79,10 +81,9 @@ namespace ariel
     }
 
    
-    NumberWithUnits NumberWithUnits::operator-(const NumberWithUnits &n) const
+    NumberWithUnits NumberWithUnits::operator-(const NumberWithUnits &n) 
     {
-        double numCheck = changer(n.number, n.str, this->str);
-        return NumberWithUnits(this->number - numCheck, this->str);
+        return NumberWithUnits(this->number - (changer(n.number, n.str, this->str)), this->str);
     }
     NumberWithUnits::operator-=(const NumberWithUnits &n)
     {
@@ -142,8 +143,6 @@ namespace ariel
     }
 
 
-
-
     NumberWithUnits operator*(double d, const NumberWithUnits &n)
     {
         return NumberWithUnits(n.number * d, n.str);
@@ -152,18 +151,20 @@ namespace ariel
     NumberWithUnits NumberWithUnits::operator*(double n) 
     {
         return n*(*this);
+    }
 
+    
     std::ostream& operator<<(std::ostream &os, const NumberWithUnits &c)
     {
         os << c.number << "[" << c.str << "]";
         return os;
     }
 
-    }
+    
 
-    istream &operator>>(istream &is, NumberWithUnits &n) {
+    istream &operator>>(std::istream &is, NumberWithUnits &n) {
         double num=0;
-        string type;
+        std::string type;
         char c=' ';
         is >> num;
         is >> c ;
@@ -173,7 +174,7 @@ namespace ariel
             }
             is>>c;
         }
-       if(MapUnit[type].empty()){throw invalid_argument{"unit doesnt exist"};};
+       if(MapUnity[type].empty()){throw invalid_argument{"unit doesnt exist"};};
         n.number=num;
         n.str=type;
         return is;
