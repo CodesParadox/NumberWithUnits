@@ -27,7 +27,7 @@ namespace ariel
     {
         if (first == last)
             return num;
-	string t = num * MapUnit.at(first).at(last);
+	
         if(MapUnit[first].find(last) == MapUnit[first].end()){
 		   throw invalid_argument{"not the same family of values!"};
 	  }
